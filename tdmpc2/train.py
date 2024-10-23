@@ -1,21 +1,20 @@
+from common.logger import Logger
+from trainer.online_trainer import OnlineTrainer
+from trainer.offline_trainer import OfflineTrainer
+from tdmpc2 import TDMPC2
+from envs import make_env
+from common.buffer import Buffer
+from common.seed import set_seed
+from common.parser import parse_cfg
+from termcolor import colored
+import hydra
+import torch
+import warnings
 import os
 os.environ['MUJOCO_GL'] = 'egl'
 os.environ['LAZY_LEGACY_OP'] = '0'
-import warnings
 warnings.filterwarnings('ignore')
-import torch
 
-import hydra
-from termcolor import colored
-
-from common.parser import parse_cfg
-from common.seed import set_seed
-from common.buffer import Buffer
-from envs import make_env
-from tdmpc2 import TDMPC2
-from trainer.offline_trainer import OfflineTrainer
-from trainer.online_trainer import OnlineTrainer
-from common.logger import Logger
 
 torch.backends.cudnn.benchmark = True
 
@@ -44,9 +43,8 @@ def train(cfg: dict):
 	assert cfg.steps > 0, 'Must train for at least 1 step.'
 	cfg = parse_cfg(cfg)
 	set_seed(cfg.seed)
-	print(colored('Work dir:', 'yellow', attrs=['bold']), cfg.work_dir)
-
-	trainer_cls = OfflineTrainer if cfg.multitask else OnlineTrainer
+	print(colored('Work dir:', 'yellow', attrs=['bold']), cfg.work_dir, cfg)
+	trainer_cls = OfflineTrainer if (cfg.multitask or (cfg.offline and cfg.data_dir is not None )) else OnlineTrainer
 	trainer = trainer_cls(
 		cfg=cfg,
 		env=make_env(cfg),

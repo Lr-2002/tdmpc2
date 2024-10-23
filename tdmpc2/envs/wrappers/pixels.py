@@ -23,7 +23,9 @@ class PixelWrapper(gym.Wrapper):
 	def _get_obs(self):
 		frame = self.env.render(
 			mode='rgb_array', width=self._render_size, height=self._render_size
-		).transpose(2, 0, 1)
+		)
+		frame = np.resize(frame, ( self._render_size, self._render_size, *frame.shape[2:]))
+		frame = frame.transpose(2, 0, 1)
 		self._frames.append(frame)
 		return torch.from_numpy(np.concatenate(self._frames))
 
@@ -31,6 +33,7 @@ class PixelWrapper(gym.Wrapper):
 		self.env.reset()
 		for _ in range(self._frames.maxlen):
 			obs = self._get_obs()
+		print('----- obs shape is ', obs.shape)
 		return obs
 
 	def step(self, action):
