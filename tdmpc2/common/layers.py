@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import transforms
 from functorch import combine_state_for_ensemble
 
 
@@ -138,6 +139,41 @@ def conv(in_shape, num_channels, act=None):
 		layers.append(act)
 	return nn.Sequential(*layers)
 
+class PretrainedVisionBackbone(nn.Module):
+	def __init__(self, cfg, backbone , transform):
+		super(PretrainedVisionBackbone, self).__init__()
+		self.backbone = backbone
+		self.transform = transform 
+		self.cfg = cfg 
+		self.fc = nn.Sequential(
+				nn.Linear(self.backbone.num_features,  self.cfg.mlp_dim),
+				nn.ReLU(),
+				nn.Linear(self.cfg.mlp_dim, self.cfg.mlp_dim))
+
+		self.backbone.requires_grad = False
+	def forward(self, x):
+		assert self.backbone.requires_grad ==False
+		x = self.transform(x) 
+		x = self.backbone.forward_features(x)
+		x = self.fc(x) 
+		x = x[:,-1, ]
+		# use cls token to stand for the whole image
+		return x 
+
+def pretrained_vit(cfg):
+	import timm
+	pretrain_encoder = timm.create_model(cfg.pretrain_model_name, pretrained=True)
+	p_info = pretrain_encoder.default_cfg
+	# pretrain_transform = timm.data.create_transform(input_size=p_info['input_size'], no_aug=True, std=p_info['std'], mean=p_info['mean'], interpolation=p_info['interpolation']) #  
+
+	transform = transforms.Compose([
+		transforms.Resize(p_info['input_size'][1:]),
+		transforms.Lambda(lambda x : x.float()/ 255.0),
+		# transforms.ToTensor(),
+		# transforms.Normalize(mean=p_info['mean'], std=p_info['std'])]) 
+		])
+	model = PretrainedVisionBackbone(cfg, pretrain_encoder, transform)
+	return model
 
 def enc(cfg, out={}):
 	"""
@@ -147,7 +183,11 @@ def enc(cfg, out={}):
 		if k == 'state':
 			out[k] = mlp(cfg.obs_shape[k][0] + cfg.task_dim, max(cfg.num_enc_layers-1, 1)*[cfg.enc_dim], cfg.latent_dim, act=SimNorm(cfg))
 		elif k == 'rgb':
-			out[k] = conv(cfg.obs_shape[k], cfg.num_channels, act=SimNorm(cfg))
+			print(cfg.use_pretrain_vision_backbone)
+			if cfg.use_pretrain_vision_backbone:
+				out[k] = pretrained_vit(cfg)
+			else:
+				out[k] = conv(cfg.obs_shape[k], cfg.num_channels, act=SimNorm(cfg))
 		else:
 			raise NotImplementedError(f"Encoder for observation type {k} not implemented.")
 	return nn.ModuleDict(out)

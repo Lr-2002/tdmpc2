@@ -4,6 +4,7 @@ class Trainer:
 	def __init__(self, cfg, env, agent, buffer, logger):
 		self.cfg = cfg
 		self.env = env
+		print('------- in the trainer class, the class env is ', self.env)
 		self.agent = agent
 		self.buffer = buffer
 		self.logger = logger

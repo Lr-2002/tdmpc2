@@ -32,6 +32,7 @@ class MetaWorldWrapper(gym.Wrapper):
 		return self.env.unwrapped
 
 	def render(self, *args, **kwargs):
+        # print('rendering data in metaworld')
 		return self.env.render(
 			offscreen=True, resolution=(384, 384), camera_name=self.camera_name
 		).copy()

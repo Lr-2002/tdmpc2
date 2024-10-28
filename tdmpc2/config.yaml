@@ -2,11 +2,11 @@ defaults:
     - override hydra/launcher: submitit_local
 
 # environment
-task: dog-run
-obs: state
+task: simpler-test
+obs: rgb
 
 # evaluation
-checkpoint: ???
+checkpoint: /home/lr-2002/code/tdmpc2/tdmpc2/checkpoint/mt80-48M.pt
 eval_episodes: 10
 eval_freq: 50000
 
@@ -34,7 +34,7 @@ iterations: 6
 num_samples: 512
 num_elites: 64
 num_pi_trajs: 24
-horizon: 3
+horizon: 1
 min_std: 0.05
 max_std: 2
 temperature: 0.5
@@ -60,12 +60,14 @@ task_dim: 96
 num_q: 5
 dropout: 0.01
 simnorm_dim: 8
+use_pretrain_vision_backbone: True
+pretrain_model_name: 'vit_small_patch14_dinov2.lvd142m'
 
 # logging
-wandb_project: ???
-wandb_entity: ???
+wandb_project: tdmpc_language_table
+wandb_entity: world_model_xh
 wandb_silent: false
-disable_wandb: true
+disable_wandb: false
 save_csv: true
 
 # misc
@@ -86,3 +88,4 @@ action_dims: ???
 episode_lengths: ???
 seed_steps: ???
 bin_size: ???
+offline: False

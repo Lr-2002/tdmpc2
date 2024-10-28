@@ -33,7 +33,6 @@ class PixelWrapper(gym.Wrapper):
 		self.env.reset()
 		for _ in range(self._frames.maxlen):
 			obs = self._get_obs()
-		print('----- obs shape is ', obs.shape)
 		return obs
 
 	def step(self, action):

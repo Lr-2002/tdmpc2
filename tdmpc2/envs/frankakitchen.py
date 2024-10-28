@@ -2,6 +2,7 @@ import numpy as np
 # from envs.wrappers.time_limit import TimeLimit
 from absl import app
 from PIL import Image
+from envs.wrappers.time_limit import TimeLimit
 import gymnasium as gym 
 import gymnasium_robotics 
 gym.register_envs(gymnasium_robotics)
@@ -19,17 +20,22 @@ class FKWrapper(gym.Wrapper):
             dtype=self.env.action_space.dtype,
         )
 
+    def get_img(self):
+        return self.env.render().copy()
+
     def reset(self):
-        return self.env.reset()
+        self.env.reset()
+        rgb = self.get_img()  
+        assert np.min(rgb) >= 0 
+        return rgb
 
     def step(self, action):
-        rgb = self.env.render()
         
-        obs, reward, terminated, truncated, info = env.step(action)
+        obs, reward, terminated, truncated, info = self.env.step(action)
         # obs['rgb'] = rgb
-        obs = rgb
+        obs = self.get_img()
 
-        return (obs, reward, terminated, truncated, info)
+        return (obs, reward, terminated or truncated, info)
     @property
     def unwrapped(self):
         return self.env.unwrapped
@@ -38,14 +44,18 @@ class FKWrapper(gym.Wrapper):
         return self.env.render()
 
 
-def make_env():
-    # if 'frk' not in cfg.task: # franka kitchen
-    #     raise ValueError('no such task in language table ')
-    #
+def make_env(cfg):
+    if 'fk-' not in cfg.task: # franka kitchen
+        raise ValueError('no such task in language table ')
+
+
+    assert cfg.get('obs', 'state') == 'rgb', 'FrankaKitchen only support for rgb obs '
+
     # print('init the task', cfg.task)
     env = gym.make('FrankaKitchen-v1', tasks_to_complete=['microwave', 'kettle'], render_mode='rgb_array')
-    # env = TimeLimit(env, max_episode_steps=cfg.episode_length)
-    # env.max_episode_steps = env._max_episode_steps
+    env = FKWrapper(env, cfg)
+    env = TimeLimit(env, max_episode_steps=cfg.episode_length)
+    env.max_episode_steps = env._max_episode_steps
     return env
 
 

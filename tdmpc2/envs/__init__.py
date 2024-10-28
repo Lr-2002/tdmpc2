@@ -30,7 +30,17 @@ try:
     from envs.languagetable import make_env as make_lt_env
 except:
     make_lt_env = missing_dependencies
+try: 
+    from envs.frankakitchen import make_env as make_fk_env
+except: 
+    make_fk_env = missing_dependencies
+try:
+    from envs.simplerenv import make_env as make_simpler_env 
+except: 
+    make_simpler_env = missing_dependencies
 
+
+print('the simpler env is', make_simpler_env)
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 
 
@@ -41,9 +51,6 @@ def make_multitask_env(cfg):
     print('Creating multi-task environment with tasks:', cfg.tasks)
     envs = []
     for task in cfg.tasks:
-        if 'mw' in task:
-            continue 
-        print('task is ', task)
         
         _cfg = deepcopy(cfg)
         _cfg.task = task
@@ -69,7 +76,7 @@ def make_env(cfg):
 
     else:
         env = None
-        for fn in [make_dm_control_env, make_maniskill_env, make_metaworld_env, make_myosuite_env, make_lt_env]:
+        for fn in [make_dm_control_env, make_maniskill_env, make_metaworld_env, make_myosuite_env, make_lt_env, make_fk_env, make_simpler_env]:
             try:
                 env = fn(cfg)
             except ValueError:
@@ -79,7 +86,7 @@ def make_env(cfg):
         env = TensorWrapper(env)
     print('----- obs is ', cfg.get('obs', 'state'))
     if cfg.get('obs', 'state') == 'rgb':
-        env = PixelWrapper(cfg, env)
+        env = PixelWrapper(cfg, env, num_frames=1)
     try: # Dict
         cfg.obs_shape = {k: v.shape for k, v in env.observation_space.spaces.items()}
     except: # Box
