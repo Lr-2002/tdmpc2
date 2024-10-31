@@ -60,7 +60,7 @@ task_dim: 96
 num_q: 5
 dropout: 0.01
 simnorm_dim: 8
-use_pretrain_vision_backbone: True
+use_pretrain_vision_backbone: False
 pretrain_model_name: 'vit_small_patch14_dinov2.lvd142m'
 
 # logging

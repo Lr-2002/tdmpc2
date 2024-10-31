@@ -52,7 +52,7 @@ def make_env(cfg):
     assert cfg.get('obs', 'state') == 'rgb', 'FrankaKitchen only support for rgb obs '
 
     # print('init the task', cfg.task)
-    env = gym.make('FrankaKitchen-v1', tasks_to_complete=['microwave', 'kettle'], render_mode='rgb_array')
+    env = gym.make('FrankaKitchen-v1', tasks_to_complete=['microwave' ], render_mode='rgb_array')
     env = FKWrapper(env, cfg)
     env = TimeLimit(env, max_episode_steps=cfg.episode_length)
     env.max_episode_steps = env._max_episode_steps

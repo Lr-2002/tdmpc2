@@ -241,7 +241,7 @@ class TDMPC2:
 		# Latent rollout
 		zs = torch.empty(self.cfg.horizon+1, self.cfg.batch_size, self.cfg.latent_dim, device=self.device)
 		z = self.model.encode(obs[0], task)
-		print(z.shape)
+		# print(z.shape)
 		zs[0] = z
 		consistency_loss = 0
 		for t in range(self.cfg.horizon):

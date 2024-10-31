@@ -154,7 +154,8 @@ class PretrainedVisionBackbone(nn.Module):
 	def forward(self, x):
 		assert self.backbone.requires_grad ==False
 		x = self.transform(x) 
-		x = self.backbone.forward_features(x)
+		with torch.no_grad():
+			x = self.backbone.forward_features(x)
 		x = self.fc(x) 
 		x = x[:,-1, ]
 		# use cls token to stand for the whole image
