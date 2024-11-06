@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from common import math
 from common.scale import RunningScale
 from common.world_model import WorldModel
+import os 
 
 
 class TDMPC2:
