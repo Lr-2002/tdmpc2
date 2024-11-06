@@ -92,6 +92,6 @@ def make_env(cfg):
     except: # Box
         cfg.obs_shape = {cfg.get('obs', 'state'): env.observation_space.shape}
     cfg.action_dim = env.action_space.shape[0]
-    cfg.episode_length = env.max_episode_steps
-    cfg.seed_steps = max(1000, 5*cfg.episode_length) if cfg.seed_steps is  None else cfg.seed_steps
+    cfg.episode_length = cfg.get('episode_length',env.max_episode_steps)
+    cfg.seed_steps = cfg.get('seed_steps',  max(1000, 5*cfg.episode_length))
     return env
