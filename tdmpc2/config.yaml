@@ -64,7 +64,7 @@ use_pretrain_vision_backbone: False
 pretrain_model_name: 'vit_small_patch14_dinov2.lvd142m'
 
 # logging
-wandb_project: tdmpc_language_table
+wandb_project: fk_test_scratch_cnn
 wandb_entity: world_model_xh
 wandb_silent: false
 disable_wandb: false
